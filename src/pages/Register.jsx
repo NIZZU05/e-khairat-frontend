@@ -23,7 +23,7 @@ function Register() {
 
     setLoading(true);
 
-    // Step 1: Create Auth User
+    // STEP 1: Create Auth User
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -41,19 +41,19 @@ function Register() {
       return;
     }
 
-    // Step 2: Insert into profiles table
-    const { error: profileError } = await supabase.from("profiles").insert([
-      {
-        id: data.user.id,
+    const userId = data.user.id;
+
+    // STEP 2: Update profile (created by trigger)
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
         full_name: fullName,
         phone: phone,
-        role: "MEMBER",
-        status: "ACTIVE",
-      },
-    ]);
+      })
+      .eq("id", userId);
 
-    if (profileError) {
-      setError(profileError.message);
+    if (updateError) {
+      setError(updateError.message);
       setLoading(false);
       return;
     }
